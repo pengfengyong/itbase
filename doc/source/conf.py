@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'itbase'
-copyright = '2023, pengfengyong'
-author = 'pengfengyong'
+project = 'ITBase'
+copyright = '2023, Fengyong Peng'
+author = 'Fengyong Peng'
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
@@ -19,7 +19,7 @@ extensions = []
 templates_path = ['_templates']
 exclude_patterns = []
 
-
+language = 'zh_CN'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
