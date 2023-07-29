@@ -1,0 +1,318 @@
+# 装饰器模式
+
+### 基础介绍
+
+装饰器模式是一种结构型设计模式，它允许你在不改变对象代码的前提下动态地给对象添加新的行为或责任。装饰器模式通过创建一个装饰器类，用于包装原始类，从而可以在运行时添加功能。
+
+这种模式的核心思想是将对象的功能划分为一系列单一的责任，而不是设计一个臃肿复杂的类，所有的责任都堆积在一起。这样，你可以通过不同的组合方式，将这些责任添加到对象中，以实现更灵活的功能扩展。
+
+我们通过一个简单的示例来说明装饰器模式：
+
+假设你有一个咖啡店，你希望能够根据客户的需求来制作不同种类的咖啡。首先，你有一个基础的咖啡类 `Coffee`：
+
+```python
+class Coffee:
+    def cost(self):
+        return 10
+
+    def description(self):
+        return "普通咖啡"
+```
+
+现在，我们希望能够为这个基础咖啡类添加额外的功能，比如加奶、加糖等。我们可以创建装饰器类来实现这些功能扩展：
+
+```python
+class MilkDecorator:
+    def __init__(self, coffee):
+        self._coffee = coffee
+
+    def cost(self):
+        return self._coffee.cost() + 5
+
+    def description(self):
+        return self._coffee.description() + "，加奶"
+
+
+class SugarDecorator:
+    def __init__(self, coffee):
+        self._coffee = coffee
+
+    def cost(self):
+        return self._coffee.cost() + 2
+
+    def description(self):
+        return self._coffee.description() + "，加糖"
+```
+
+现在我们可以通过装饰器来创建不同种类的咖啡：
+
+```python
+base_coffee = Coffee()
+print(base_coffee.description())  # 输出：普通咖啡，加奶，加糖
+
+coffee_with_milk = MilkDecorator(base_coffee)
+print(coffee_with_milk.description())  # 输出：普通咖啡，加奶
+
+coffee_with_milk_and_sugar = SugarDecorator(coffee_with_milk)
+print(coffee_with_milk_and_sugar.description())  # 输出：普通咖啡，加奶，加糖
+```
+
+如上所示，我们可以通过装饰器 `MilkDecorator` 和 `SugarDecorator` 来动态地给基础咖啡类 `Coffee` 添加新的功能，而且可以随意组合这些装饰器，实现各种不同的组合效果。
+
+装饰器模式使得代码更加灵活，允许你在运行时动态地添加功能，而不需要修改原始类的代码。这样，你可以将功能的单一责任分开，使得代码更易于维护和扩展。
+
+### 深入探究
+
+我们熟知的`python`,`Java`等编程语言都提供默认的装饰器类，像`C++`这种不提供装饰器类的语言要实现装饰器模式就只能手写了。一下提供四种手写装饰器类的方式：
+
+1.继承与派生
+```cpp
+#include <iostream>
+
+// 基础咖啡类
+class Coffee {
+public:
+    virtual int cost() const { return 10; }
+    virtual std::string description() const { return "普通咖啡"; }
+};
+
+// 加奶装饰器
+class MilkDecorator : public Coffee {
+private:
+    Coffee* coffee;
+
+public:
+    MilkDecorator(Coffee* coffee) : coffee(coffee) {}
+
+    int cost() const override { return coffee->cost() + 5; }
+
+    std::string description() const override {
+        return coffee->description() + "，加奶";
+    }
+};
+
+// 加糖装饰器
+class SugarDecorator : public Coffee {
+private:
+    Coffee* coffee;
+
+public:
+    SugarDecorator(Coffee* coffee) : coffee(coffee) {}
+
+    int cost() const override { return coffee->cost() + 2; }
+
+    std::string description() const override {
+        return coffee->description() + "，加糖";
+    }
+};
+
+int main() {
+    Coffee* base_coffee = new Coffee();
+    std::cout << base_coffee->description() << "，价格：" << base_coffee->cost() << "元" << std::endl;
+
+    Coffee* coffee_with_milk = new MilkDecorator(base_coffee);
+    std::cout << coffee_with_milk->description() << "，价格：" << coffee_with_milk->cost() << "元" << std::endl;
+
+    Coffee* coffee_with_milk_and_sugar = new SugarDecorator(coffee_with_milk);
+    std::cout << coffee_with_milk_and_sugar->description() << "，价格：" << coffee_with_milk_and_sugar->cost() << "元" << std::endl;
+
+    delete base_coffee;
+    delete coffee_with_milk;
+    delete coffee_with_milk_and_sugar;
+
+    return 0;
+}
+
+```
+
+2.组合
+```cpp
+#include <iostream>
+#include <string>
+
+// 咖啡接口
+class Coffee {
+public:
+    virtual int cost() const = 0;
+    virtual std::string description() const = 0;
+};
+
+// 基础咖啡类
+class BaseCoffee : public Coffee {
+public:
+    int cost() const override { return 10; }
+    std::string description() const override { return "普通咖啡"; }
+};
+
+// 装饰器类
+class CoffeeDecorator : public Coffee {
+protected:
+    Coffee* coffee;
+
+public:
+    CoffeeDecorator(Coffee* coffee) : coffee(coffee) {}
+
+    int cost() const override { return coffee->cost(); }
+    std::string description() const override { return coffee->description(); }
+};
+
+// 加奶装饰器
+class MilkDecorator : public CoffeeDecorator {
+public:
+    MilkDecorator(Coffee* coffee) : CoffeeDecorator(coffee) {}
+
+    int cost() const override { return coffee->cost() + 5; }
+    std::string description() const override { return coffee->description() + "，加奶"; }
+};
+
+// 加糖装饰器
+class SugarDecorator : public CoffeeDecorator {
+public:
+    SugarDecorator(Coffee* coffee) : CoffeeDecorator(coffee) {}
+
+    int cost() const override { return coffee->cost() + 2; }
+    std::string description() const override { return coffee->description() + "，加糖"; }
+};
+
+int main() {
+    Coffee* base_coffee = new BaseCoffee();
+    std::cout << base_coffee->description() << "，价格：" << base_coffee->cost() << "元" << std::endl;
+
+    Coffee* coffee_with_milk = new MilkDecorator(base_coffee);
+    std::cout << coffee_with_milk->description() << "，价格：" << coffee_with_milk->cost() << "元" << std::endl;
+
+    Coffee* coffee_with_milk_and_sugar = new SugarDecorator(coffee_with_milk);
+    std::cout << coffee_with_milk_and_sugar->description() << "，价格：" << coffee_with_milk_and_sugar->cost() << "元" << std::endl;
+
+    delete base_coffee;
+    delete coffee_with_milk;
+    delete coffee_with_milk_and_sugar;
+
+    return 0;
+}
+
+```
+
+3.智能指针
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+// 咖啡接口
+class Coffee {
+public:
+    virtual int cost() const = 0;
+    virtual std::string description() const = 0;
+};
+
+// 基础咖啡类
+class BaseCoffee : public Coffee {
+public:
+    int cost() const override { return 10; }
+    std::string description() const override { return "普通咖啡"; }
+};
+
+// 装饰器类
+class CoffeeDecorator : public Coffee {
+protected:
+    std::shared_ptr<Coffee> coffee;
+
+public:
+    CoffeeDecorator(std::shared_ptr<Coffee> coffee) : coffee(coffee) {}
+
+    int cost() const override { return coffee->cost(); }
+    std::string description() const override { return coffee->description(); }
+};
+
+// 加奶装饰器
+class MilkDecorator : public CoffeeDecorator {
+public:
+    MilkDecorator(std::shared_ptr<Coffee> coffee) : CoffeeDecorator(coffee) {}
+
+    int cost() const override { return coffee->cost() + 5; }
+    std::string description() const override { return coffee->description() + "，加奶"; }
+};
+
+// 加糖装饰器
+class SugarDecorator : public CoffeeDecorator {
+public:
+    SugarDecorator(std::shared_ptr<Coffee> coffee) : CoffeeDecorator(coffee) {}
+
+    int cost() const override { return coffee->cost() + 2; }
+    std::string description() const override { return coffee->description() + "，加糖"; }
+};
+
+int main() {
+    std::shared_ptr<Coffee> base_coffee = std::make_shared<BaseCoffee>();
+    std::cout << base_coffee->description() << "，价格：" << base_coffee->cost() << "元" << std::endl;
+
+    std::shared_ptr<Coffee> coffee_with_milk = std::make_shared<MilkDecorator>(base_coffee);
+    std::cout << coffee_with_milk->description() << "，价格：" << coffee_with_milk->cost() << "元" << std::endl;
+
+    std::shared_ptr<Coffee> coffee_with_milk_and_sugar = std::make_shared<SugarDecorator>(coffee_with_milk);
+    std::cout << coffee_with_milk_and_sugar->description() << "，价格：" << coffee_with_milk_and_sugar->cost() << "元" << std::endl;
+
+    return 0;
+}
+
+```
+
+4.函数指针与函数对象
+```cpp
+#include <iostream>
+#include <string>
+#include <functional>
+
+// 咖啡接口
+class Coffee {
+public:
+    virtual int cost() const = 0;
+    virtual std::string description() const = 0;
+};
+
+// 基础咖啡类
+class BaseCoffee : public Coffee {
+public:
+    int cost() const override { return 10; }
+    std::string description() const override { return "普通咖啡"; }
+};
+
+// 装饰器函数
+std::function<int()> WithMilk(std::function<int()> func) {
+    return [=] { return func() + 5; };
+}
+
+std::function<std::string()> WithMilkDescription(std::function<std::string()> func) {
+    return [=] { return func() + "，加奶"; };
+}
+
+std::function<int()> WithSugar(std::function<int()> func) {
+    return [=] { return func() + 2; };
+}
+
+std::function<std::string()> WithSugarDescription(std::function<std::string()> func) {
+    return [=] { return func() + "，加糖"; };
+}
+
+int main() {
+    Coffee* base_coffee = new BaseCoffee();
+    std::function<int()> cost_func = [=] { return base_coffee->cost(); };
+    std::function<std::string()> description_func = [=] { return base_coffee->description(); };
+
+    std::function<int()> coffee_with_milk_cost = WithMilk(cost_func);
+    std::function<std::string()> coffee_with_milk_description = WithMilkDescription(description_func);
+
+    std::function<int()> coffee_with_milk_and_sugar_cost = WithSugar(WithMilk(cost_func));
+    std::function<std::string()> coffee_with_milk_and_sugar_description = WithSugarDescription(WithMilkDescription(description_func));
+
+    std::cout << coffee_with_milk_description() << "，价格：" << coffee_with_milk_cost() << "元" << std::endl;
+    std::cout << coffee_with_milk_and_sugar_description() << "，价格：" << coffee_with_milk_and_sugar_cost() << "元" << std::endl;
+
+    delete base_coffee;
+    return 0;
+}
+
+```
+
+以上例子演示了不同的装饰器实现方法，使用不同的技巧来实现类似于装饰器模式的功能。每种方法都有其优势和适用场景，实际编程中根据具体情况来选择适合的方法。
